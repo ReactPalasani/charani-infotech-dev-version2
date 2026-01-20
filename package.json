@@ -1,0 +1,33 @@
+{
+  "name": "interview-validation",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "firebase": "^12.7.0",
+    "firebase-admin": "^13.6.0",
+    "formik": "^2.4.9",
+    "geist": "^1.5.1",
+    "lucide-react": "^0.562.0",
+    "next": "16.1.1",
+    "react": "19.2.3",
+    "react-data-table-component": "^7.7.0",
+    "react-dom": "19.2.3",
+    "react-full-screen": "^1.1.1",
+    "xlsx": "^0.18.5",
+    "yup": "^1.7.1",
+    "zustand": "^5.0.9"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "babel-plugin-react-compiler": "1.0.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.1",
+    "tailwindcss": "^4"
+  }
+}
