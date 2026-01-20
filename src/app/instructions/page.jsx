@@ -10,24 +10,26 @@ import Footer from "@/components/Footer";
 function InstructionsPage() {
   const [accepted, setAccepted] = useState(false);
 
-  const router=useRouter();
+  const router = useRouter();
 
   const handleStart = () => {
     if (accepted) {
       window.location.href = "/exam";
     }
   };
-   const [StudentData, setStudentData] = useState(null);
+  const [StudentData, setStudentData] = useState(null);
 
-useEffect(() => {
-  const data = localStorage.getItem("StudentData");
-  if (data) {
-    setStudentData(JSON.parse(data));
-  }
-  else{
-    window.location.href = "/registration";
-  }
-}, []);
+  useEffect(() => {
+    const data = localStorage.getItem("StudentData");
+    if (data) {
+      setStudentData(JSON.parse(data));
+    }
+    else {
+      window.location.href = "/registration";
+    }
+  }, []);
+
+
 
 
   return (
@@ -39,7 +41,7 @@ useEffect(() => {
 
       <div className="flex justify-center px-4 py-8">
         <div className="w-full max-w-4xl bg-white rounded-xl shadow-xl p-6 md:p-8">
-          
+
           {/* Title */}
           <div className="flex items-center gap-3 mb-4">
             <div className="bg-blue-900 text-white p-2 rounded-full">
@@ -125,19 +127,18 @@ useEffect(() => {
 
           {/* CTA */}
           <button
-             onClick={handleStart}
+            onClick={handleStart}
             disabled={!accepted}
-            className={`w-full py-3 rounded-lg font-bold transition ${
-              accepted
-                ? "bg-blue-900 text-white hover:bg-blue-800"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"
-            }`}
+            className={`w-full py-3 rounded-lg font-bold transition ${accepted
+              ? "bg-blue-900 text-white hover:bg-blue-800"
+              : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
           >
             I AM READY TO START
           </button>
         </div>
       </div>
-      <Footer/>
+      <Footer />
     </div>
   );
 }
