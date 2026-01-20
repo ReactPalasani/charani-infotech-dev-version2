@@ -31,7 +31,7 @@ function InstructionsPage() {
     }
   }, []);
 
-useEffect(() => {
+  useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };
@@ -156,9 +156,9 @@ useEffect(() => {
         </div>
       </div>
       <div className="flex p-2 gap-2 mt-5 text-big  justify-center">
-  <span>&copy;</span> 
-  Copyright 2025 Charani Infotech Pvt Ltd. All Rights Reserved.
-</div>
+        <span>&copy;</span>
+        Copyright 2025 Charani Infotech Pvt Ltd. All Rights Reserved.
+      </div>
     </div>
   );
 }
