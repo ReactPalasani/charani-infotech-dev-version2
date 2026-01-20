@@ -9,12 +9,14 @@ import Footer from "@/components/Footer";
 
 function InstructionsPage() {
   const [accepted, setAccepted] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const router = useRouter();
 
   const handleStart = () => {
+    enterFullscreen();
     if (accepted) {
-      window.location.href = "/exam";
+      router.push("/exam");
     }
   };
   const [StudentData, setStudentData] = useState(null);
@@ -29,8 +31,23 @@ function InstructionsPage() {
     }
   }, []);
 
+useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
 
-
+  // 3. Trigger Fullscreen (Must be called by onClick)
+  const enterFullscreen = () => {
+    const elem = document.documentElement;
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen().catch((err) => {
+        console.error("Fullscreen blocked:", err);
+      });
+    }
+  };
 
   return (
 
@@ -138,7 +155,10 @@ function InstructionsPage() {
           </button>
         </div>
       </div>
-      <Footer />
+      <div className="flex p-2 gap-2 mt-5 text-big  justify-center">
+  <span>&copy;</span> 
+  Copyright 2025 Charani Infotech Pvt Ltd. All Rights Reserved.
+</div>
     </div>
   );
 }
