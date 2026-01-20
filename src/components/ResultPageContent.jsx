@@ -134,7 +134,10 @@ const fetchResult = async () => {
           <ArrowLeft size={18} /> Go Back
         </button>
       </div>
-      <Footer/>
+            <div className="flex p-2 gap-2 mt-5 text-big  justify-center">
+  <span>&copy;</span> 
+  Copyright 2025 Charani Infotech Pvt Ltd. All Rights Reserved.
+</div>
     </div>
   );
 }
