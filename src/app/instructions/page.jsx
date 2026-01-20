@@ -9,12 +9,14 @@ import Footer from "@/components/Footer";
 
 function InstructionsPage() {
   const [accepted, setAccepted] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const router=useRouter();
 
   const handleStart = () => {
+    enterFullscreen();
     if (accepted) {
-      window.location.href = "/exam";
+      router.push("/exam");
     }
   };
    const [StudentData, setStudentData] = useState(null);
@@ -29,6 +31,23 @@ useEffect(() => {
   }
 }, []);
 
+useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  // 3. Trigger Fullscreen (Must be called by onClick)
+  const enterFullscreen = () => {
+    const elem = document.documentElement;
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen().catch((err) => {
+        console.error("Fullscreen blocked:", err);
+      });
+    }
+  };
 
   return (
 
