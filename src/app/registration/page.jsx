@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { ShieldCheck, Timer, CheckCircle, User, Mail, Phone, BookOpen, Building2, GraduationCap, History, ArrowRight, Calendar, RotateCcw } from 'lucide-react';
+import { ShieldCheck, Timer, CheckCircle, User, Mail, Phone, BookOpen, Building2, GraduationCap, History, ArrowRight, Calendar, RotateCcw, Copyright } from 'lucide-react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useRouter } from "next/navigation";
@@ -133,7 +133,6 @@ export default function ExamPage() {
 
     return (
         <>
-        <Header/>
             <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4 font-sans text-black">
                 <div className="flex flex-col md:flex-row w-full max-w-6xl rounded-xl shadow-2xl overflow-hidden bg-white">
 
@@ -155,6 +154,9 @@ export default function ExamPage() {
                             <div className="flex items-center gap-4"><ShieldCheck className="w-8 h-8 text-green-400" /><h3 className="font-semibold text-lg">Secure & Protected</h3></div>
                             <div className="flex items-center gap-4"><Timer className="w-8 h-8 text-amber-400" /><h3 className="font-semibold text-lg">Real-time Analytics</h3></div>
                         </div>
+                          <div className="flex  p-2 gap-2 mt-5 text-sm">
+            <Copyright /> Copyright 2025 Charani Infotech Pvt Ltd. <br />All Rights Reserved.
+            </div>
                     </div>
 
                     {/* Right Side - Form */}
@@ -299,8 +301,9 @@ export default function ExamPage() {
                         {responce}
                     </div>
                 </div>
+                <div>
+                </div>
             </div>
-            <Footer/>
         </>
     );
 }
