@@ -3,138 +3,149 @@ import { useEffect } from "react";
 
 const SecurityEnforcer = () => {
     useEffect(() => {
+        // Helper to safe clear clipboard
+        const safeClearClipboard = () => {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText("").catch((err) => {
+                    // Suppress NotAllowedError which happens if not focused
+                    console.warn("Clipboard clear prevented:", err);
+                });
+            }
+        };
+
+        // Helper to hide/show content
+        const setContentVisibility = (visible) => {
+            const value = visible ? "visible" : "hidden";
+            document.documentElement.style.visibility = value;
+
+            // Also blank the clipboard if hiding
+            if (!visible) {
+                safeClearClipboard();
+            }
+        };
+
         // 1. Disable Back Button
-        const handlePopState = (event) => {
+        const handlePopState = () => {
             window.history.pushState(null, "", window.location.href);
         };
         window.history.pushState(null, "", window.location.href);
         window.addEventListener("popstate", handlePopState);
 
-        // 2. Disable Page Refresh (Confirm on Reload)
+        // 2. Disable Page Refresh
         const handleBeforeUnload = (e) => {
             e.preventDefault();
-            e.returnValue = ""; // Chrome requires returnValue to be set
+            e.returnValue = "";
         };
         window.addEventListener("beforeunload", handleBeforeUnload);
 
-        // Attempt to Lock Keyboard (specifically Escape) to prevent exiting Fullscreen
-        const lockEscapeKey = async () => {
+        // 3. Lock Keys (Aggressive)
+        const lockKeys = async () => {
             if ('keyboard' in navigator && 'lock' in navigator.keyboard) {
                 try {
-                    await navigator.keyboard.lock(["Escape"]);
-                    console.log("Escape key locked successfully");
+                    // This creates the "exclusive" lock that prevents the OS overlay
+                    await navigator.keyboard.lock(["Escape", "PrintScreen"]);
                 } catch (err) {
-                    console.log("Keyboard lock failed (likely needs user gesture)", err);
+                    console.log(err);
                 }
             }
         };
+        // Trigger lock on any interaction
+        window.addEventListener('click', lockKeys);
+        window.addEventListener('keydown', lockKeys);
+        window.addEventListener('mousedown', lockKeys);
+        window.addEventListener('focus', lockKeys); // Added focus listener
 
-        lockEscapeKey();
-        // Retry lock on first interaction
-        window.addEventListener('click', lockEscapeKey, { once: true });
-        window.addEventListener('keydown', lockEscapeKey, { once: true });
-
-        // 3. Disable Specific Keys
+        // 4. Handle Key Down (Block Shortcuts)
         const handleKeyDown = (e) => {
-            // Refresh: F5, Ctrl+R
+            // Block standard shortcuts
             if (
                 e.key === "F5" ||
-                (e.ctrlKey && (e.key === "r" || e.key === "R"))
+                (e.ctrlKey && (e.key === "r" || e.key === "R")) ||
+                (e.key === "F12") ||
+                (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J" || e.key === "C")) ||
+                (e.ctrlKey && (e.key === "u" || e.key === "U")) ||
+                (e.key === "Escape")
             ) {
                 e.preventDefault();
+                e.stopPropagation();
             }
 
-            // Print Screen (Prevent Default & Blur Screen)
+            // DETECT PRINT SCREEN
             if (e.key === "PrintScreen") {
                 e.preventDefault();
-                // Immediately hide content to race against OS screenshot
-                document.body.style.display = "none";
+                e.stopPropagation();
+                e.stopImmediatePropagation();
 
-                navigator.clipboard.writeText("").catch((err) => {
-                    // Fail silently
-                    console.warn("Clipboard access denied", err);
-                });
-            }
-
-            // Escape
-            if (e.key === "Escape") {
-                e.preventDefault();
-            }
-
-            // Delete
-            if (e.key === "Delete") {
-                e.preventDefault();
-            }
-
-            // Inspect: F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
-            if (
-                e.key === "F12" ||
-                (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J" || e.key === "C")) || // Added Ctrl+Shift+C (Element selector)
-                (e.ctrlKey && (e.key === "u" || e.key === "U"))
-            ) {
-                e.preventDefault();
+                // Immediately hide content
+                setContentVisibility(false);
+                return false;
             }
         };
-        window.addEventListener("keydown", handleKeyDown);
+        window.addEventListener("keydown", handleKeyDown, true);
 
-        // 4. Handle KeyUp (Restore content after PrintScreen)
+        // 5. Handle Key Up
         const handleKeyUp = (e) => {
             if (e.key === "PrintScreen") {
-                // Restore content
-                setTimeout(() => {
-                    document.body.style.display = "";
-                    alert("Screenshots are disabled during the exam.");
-                }, 100);
-
-                navigator.clipboard.writeText("").then(() => {
-                }).catch((err) => {
-                    console.warn("Clipboard access denied", err);
-                });
+                // DO NOT automatically show content here.
+                // The Snipping Tool overlay might still be open.
+                // We leave it hidden until the user clicks back (Focus event).
+                safeClearClipboard();
             }
         };
-        window.addEventListener("keyup", handleKeyUp);
+        window.addEventListener("keyup", handleKeyUp, true);
 
-        // 5. Blur Content on Window Blur (e.g. Snipping Tool usage)
+        // 6. WINDOW BLUR (Crucial for Snipping Tool)
+        // When the Snipping Tool bar opens, the browser loses focus.
+        // We immediately hide the screen.
         const handleWindowBlur = () => {
-            document.body.style.filter = "blur(10px)";
+            setContentVisibility(false); // Hide everything
         };
+
+        // 7. WINDOW FOCUS
+        // When they close the tool and click back on the test, we show content.
         const handleWindowFocus = () => {
-            document.body.style.filter = "none";
+            setContentVisibility(true); // Show everything
+            lockKeys(); // Re-apply lock
         };
+
         window.addEventListener("blur", handleWindowBlur);
         window.addEventListener("focus", handleWindowFocus);
 
-        // 5. Disable Right Click (Inspect)
+        // 8. Disable Context Menu
         const handleContextMenu = (e) => {
             e.preventDefault();
+            e.stopPropagation();
         };
-        window.addEventListener("contextmenu", handleContextMenu);
+        window.addEventListener("contextmenu", handleContextMenu, true);
 
-        // 6. Disable Copy/Cut/Paste
+        // 9. Disable Copy/Paste
         const handleCopyCutPaste = (e) => {
             e.preventDefault();
         }
-        window.addEventListener("copy", handleCopyCutPaste);
-        window.addEventListener("cut", handleCopyCutPaste);
-        window.addEventListener("paste", handleCopyCutPaste);
-
+        window.addEventListener("copy", handleCopyCutPaste, true);
+        window.addEventListener("cut", handleCopyCutPaste, true);
+        window.addEventListener("paste", handleCopyCutPaste, true);
 
         // Cleanup
         return () => {
             window.removeEventListener("popstate", handlePopState);
             window.removeEventListener("beforeunload", handleBeforeUnload);
-            window.removeEventListener("keydown", handleKeyDown);
-            window.removeEventListener("keyup", handleKeyUp);
-            window.removeEventListener("contextmenu", handleContextMenu);
-            window.removeEventListener("copy", handleCopyCutPaste);
-            window.removeEventListener("cut", handleCopyCutPaste);
-            window.removeEventListener("paste", handleCopyCutPaste);
+            window.removeEventListener("keydown", handleKeyDown, true);
+            window.removeEventListener("keyup", handleKeyUp, true);
             window.removeEventListener("blur", handleWindowBlur);
             window.removeEventListener("focus", handleWindowFocus);
+            window.removeEventListener("contextmenu", handleContextMenu, true);
+            window.removeEventListener("copy", handleCopyCutPaste, true);
+            window.removeEventListener("cut", handleCopyCutPaste, true);
+            window.removeEventListener("paste", handleCopyCutPaste, true);
+            window.removeEventListener('click', lockKeys);
+            window.removeEventListener('keydown', lockKeys);
+            window.removeEventListener('mousedown', lockKeys);
+            window.removeEventListener('focus', lockKeys);
         };
     }, []);
 
-    return null; // This component does not render anything
+    return null;
 };
 
 export default SecurityEnforcer;

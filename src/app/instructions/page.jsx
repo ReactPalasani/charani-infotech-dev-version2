@@ -32,6 +32,20 @@ function InstructionsPage() {
   }, []);
 
   useEffect(() => {
+    // Prevent back button
+    window.history.pushState(null, null, window.location.href);
+    const handlePopState = () => {
+      window.history.pushState(null, null, window.location.href);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
+
+  useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };
