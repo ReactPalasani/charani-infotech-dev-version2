@@ -10,7 +10,7 @@ export default function SubmitExamButton() {
   const router = useRouter();
 
   const handleSubmit = async () => {
-    if (!confirm("Are you sure you want to submit the exam?")) return;
+    // if (!confirm("Are you sure you want to submit the exam?")) return;
     const StudentData = JSON.parse(localStorage.getItem("StudentData")) || {};
     // 🔹 Student details from localStorage or form
     const studentName = StudentData.name || "Unknown";
@@ -81,7 +81,7 @@ export default function SubmitExamButton() {
   }, [time]);
 
   return (
-    <div className="flex justify-center mt-6">
+    <div className="flex justify-center mt-6 opacity-0 pointer-events-none">
       <button
         onClick={handleSubmit}
         className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded"
