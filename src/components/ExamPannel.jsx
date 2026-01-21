@@ -98,7 +98,7 @@ export default function ExamPanel() {
 
       <div className="flex justify-between mt-6">
         <button
-          className="bg-black text-white px-4 py-2 rounded flex items-center"
+          className="bg-black text-white px-4 py-2 rounded flex items-center opacity-0 pointer-events-none"
           onClick={() => setCurrentIndex(i => i - 1)}
           disabled={currentIndex === 0}
         >
@@ -106,7 +106,7 @@ export default function ExamPanel() {
         </button>
 
         <button
-          className="bg-yellow-600 text-white px-4 py-2 rounded flex items-center"
+          className="bg-yellow-600 text-white px-4 py-2 rounded flex items-center opacity-0 pointer-events-none"
           onClick={handleNext}
         >
           {isLastQuestion ? "Next Section" : "Next"}  <ArrowRight/>
