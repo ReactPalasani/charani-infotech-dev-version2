@@ -288,10 +288,11 @@ export default function QuestionPalette() {
       </h1>
 
       <div className="text-center py-2 font-medium">
-        Time left for the each question:{" "} sec
+        Time left for the each question:{" "}
         <span className={`${isWarning ? "text-red-600 font-bold animate-pulse" : ""}`}>
           {timeLeft}
         </span>
+        sec
       </div>
 
       <div className="w-full bg-white p-4  shadow  border">
