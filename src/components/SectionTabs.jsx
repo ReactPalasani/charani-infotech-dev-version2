@@ -63,16 +63,19 @@ export default function SectionTabs() {
 
   /* 🔁 Change section when timer ends */
   useEffect(() => {
-    if (timeLeft === 0) {
-      const currentIndex = SECTIONS.findIndex(
-        (s) => s.key === section
-      );
+    if (timeLeft <= 0) {                      // changed === to <= (safer)
+      const currentIndex = SECTIONS.findIndex((s) => s.key === section);
 
-      const nextIndex =
-        (currentIndex + 1) % SECTIONS.length;
-
-      setSection(SECTIONS[nextIndex].key);
-      setTimeLeft(SECTION_TIME); // reset timer
+      // ────────────── Add this condition ───────────────
+      if (currentIndex < SECTIONS.length - 1) {
+        const nextIndex = currentIndex + 1;
+        setSection(SECTIONS[nextIndex].key);
+        setTimeLeft(SECTION_TIME);
+      } else {
+        // Last section → stop timer, don't cycle
+        setTimeLeft(0);
+        // You can add here: show finish message, submit exam, etc.
+      }
     }
   }, [timeLeft, section, setSection]);
 
@@ -92,13 +95,22 @@ export default function SectionTabs() {
           <button
             key={key}
             onClick={() => {
-              setSection(key);
-              setTimeLeft(SECTION_TIME); // reset timer on manual click
+              // ────────────── Add this guard ───────────────
+              if (key === section) {           // only allow clicking the current section
+                setSection(key);
+                setTimeLeft(SECTION_TIME);
+              }
+              // or stricter version:
+              // if (key === section || timeLeft <= 0) { ... }   ← allow next only after time up
             }}
             className={`flex-1 py-3 font-semibold transition border shadow
-              flex items-center justify-center gap-2 
-              ${isActive ? "bg-blue-900 text-white" : "bg-white opacity-0 pointer-events-none"}
-            `}
+            flex items-center justify-center gap-2
+            ${isActive ? "bg-blue-900 text-white" : "bg-white"}
+            // ────────────── Add visual feedback ───────────────
+            ${key !== section ? "opacity-50 cursor-not-allowed" : ""}
+          `}
+            // ────────────── Add real disable attribute ───────────────
+            disabled={key !== section}
           >
             <Icon className="w-4 h-4" />
             {label}
