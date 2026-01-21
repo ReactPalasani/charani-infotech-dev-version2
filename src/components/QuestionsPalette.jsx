@@ -288,7 +288,7 @@ export default function QuestionPalette() {
       </h1>
 
       <div className="text-center py-2 font-medium">
-        Time left:{" "}
+        Time left for the each question:{" "}
         <span className={`${isWarning ? "text-red-600 font-bold animate-pulse" : ""}`}>
           {timeLeft}
         </span>
@@ -317,9 +317,9 @@ export default function QuestionPalette() {
             let borderColor = "border-gray-300";
 
             if (isAnswered) {
-              bgColor = "bg-green-100 border-green-400 text-green-900 font-semibold";
-              textColor = "text-green-900";
-              borderColor = "border-green-400";
+              bgColor = "bg-blue-100 border-blue-400 text-blue-900 font-semibold";
+              textColor = "text-blue-900";
+              borderColor = "border-blue-400";
             } else if (timeExpired || timeIsUpNow) {
               bgColor = "bg-red-100 border-red-400 text-red-900 font-semibold";
               textColor = "text-red-900";
@@ -332,7 +332,7 @@ export default function QuestionPalette() {
                 onClick={() => isEnabled && setCurrentIndex(i)}
                 disabled={!isEnabled}
                 className={`
-                  relative w-15 h-15 flex items-center justify-center ml-4
+                  relative w-13 h-13 flex items-center justify-center ml-4 mr-2
                   text-sm font-medium rounded-md border transition-all duration-200
                   ${isEnabled
                     ? "ring-2 ring-offset-2 ring-blue-600 scale-105 cursor-pointer bg-white"
@@ -370,7 +370,7 @@ export default function QuestionPalette() {
         {/* Legend */}
         <div className="mt-6 text-sm grid gap-4 ml-4">
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-green-100 border border-green-400" />
+            <div className="w-4 h-4 rounded bg-blue-100 border border-blue-400" />
             <span>Answered</span>
           </div>
           <div className="flex items-center gap-2">
@@ -379,7 +379,7 @@ export default function QuestionPalette() {
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-red-100 border border-red-400" />
-            <span>Time up (not answered)</span>
+            <span>Time up or not answered</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-gray-100 border border-gray-300 opacity-65" />
