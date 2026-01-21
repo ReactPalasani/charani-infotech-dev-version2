@@ -205,7 +205,7 @@ export default function QuestionPalette() {
 
   const sectionAnswers = answers[section] || {};
 
-  const TIME_PER_QUESTION = 45;
+  const TIME_PER_QUESTION = 30;
 
   const [timeLeft, setTimeLeft] = useState(TIME_PER_QUESTION);
   const [timeExpiredQuestions, setTimeExpiredQuestions] = useState(new Set());
@@ -288,7 +288,7 @@ export default function QuestionPalette() {
       </h1>
 
       <div className="text-center py-2 font-medium">
-        Time left for the each question:{" "}
+        Time left for the each question:{" "} sec
         <span className={`${isWarning ? "text-red-600 font-bold animate-pulse" : ""}`}>
           {timeLeft}
         </span>
