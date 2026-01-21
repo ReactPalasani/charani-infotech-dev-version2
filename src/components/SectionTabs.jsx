@@ -46,7 +46,7 @@ const SECTIONS = [
   { key: "Communication", label: "Communication", icon: MessageSquare },
 ];
 
-const SECTION_TIME = 20; // 900 seconds = 15 minutes
+const SECTION_TIME = 900; // 900 seconds = 15 minutes
 
 export default function SectionTabs() {
   const { section, setSection } = useExam();
@@ -107,7 +107,7 @@ export default function SectionTabs() {
       })}
 
       {/* Optional timer display */}
-      <div className="ml-4 text-sm font-semibold">
+      <div className="ml-4 text-sm font-semibold opacity-0 pointer-events-none">
         ⏳ {Math.floor(timeLeft / 60)}:
         {(timeLeft % 60).toString().padStart(2, "0")}
       </div>

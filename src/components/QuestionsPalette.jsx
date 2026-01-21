@@ -205,7 +205,7 @@ export default function QuestionPalette() {
 
   const sectionAnswers = answers[section] || {};
 
-  const TIME_PER_QUESTION = 1;
+  const TIME_PER_QUESTION = 45;
 
   const [timeLeft, setTimeLeft] = useState(TIME_PER_QUESTION);
   const [timeExpiredQuestions, setTimeExpiredQuestions] = useState(new Set());
@@ -290,12 +290,12 @@ export default function QuestionPalette() {
       <div className="text-center py-2 font-medium">
         Time left:{" "}
         <span className={`${isWarning ? "text-red-600 font-bold animate-pulse" : ""}`}>
-          {timeLeft}s
+          {timeLeft}
         </span>
       </div>
 
-      <div className="w-full bg-white p-6 shadow border rounded-xl">
-        <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3 mt-3">
+      <div className="w-full bg-white p-4  shadow  border">
+      <div className="grid grid-cols-5 gap-4  rounded-2xl mt-5" >
           {questions.map((_, i) => {
             const isCurrent = i === currentIndex;
             const isAnswered = !!sectionAnswers[i];
@@ -312,7 +312,7 @@ export default function QuestionPalette() {
             // 3. Current → white + ring + timer bar
             // 4. Others → gray/disabled
             // ────────────────────────────────────────────────
-            let bgColor = "bg-gray-100 border-gray-300 text-gray-600";
+            let bgColor = "bg-gray-200 border-gray-300 text-gray-600";
             let textColor = "text-gray-600";
             let borderColor = "border-gray-300";
 
@@ -332,7 +332,7 @@ export default function QuestionPalette() {
                 onClick={() => isEnabled && setCurrentIndex(i)}
                 disabled={!isEnabled}
                 className={`
-                  relative w-10 h-10 flex items-center justify-center
+                  relative w-15 h-15 flex items-center justify-center ml-4
                   text-sm font-medium rounded-md border transition-all duration-200
                   ${isEnabled
                     ? "ring-2 ring-offset-2 ring-blue-600 scale-105 cursor-pointer bg-white"
@@ -347,7 +347,7 @@ export default function QuestionPalette() {
                 {isCurrent && timeLeft > 0 && (
                   <div
                     className={`absolute inset-0 origin-left pointer-events-none transition-colors ${
-                      isWarning ? "bg-red-500/30" : "bg-blue-500/25"
+                      isWarning ? "bg-red-700" : "bg-blue-900"
                     }`}
                     style={{
                       transform: `scaleX(${1 - progress})`,
@@ -368,7 +368,7 @@ export default function QuestionPalette() {
         </div>
 
         {/* Legend */}
-        <div className="mt-6 text-sm grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="mt-6 text-sm grid gap-4 ml-4">
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-green-100 border border-green-400" />
             <span>Answered</span>
