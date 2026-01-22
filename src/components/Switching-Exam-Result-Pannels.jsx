@@ -5,10 +5,11 @@ import { usePathname } from "next/navigation";
 
 const tabs = [
   {label:"Dashboard", path:"/hr-portal/dashboard"},
-  { label: "Aptitude", path: "/hr-portal/exam-result" },
+  { label: "Exam-Result", path: "/hr-portal/exam-result" },
   { label: "Jam", path: "/hr-portal/jam-result" },
-  { label: "Technical-1", path: "/hr-portal/tr1-result" },
-  { label: "Technical-2", path: "/hr-portal/tr2-result" },
+  { label: "Technical-Selected", path: "/hr-portal/TR1-Selected-Candiates" },
+  { label: "Technical-Result", path: "/hr-portal/tr1-result" },
+  { label: "Interview", path: "/hr-portal/tr2-result" },
   { label: "HR", path: "/hr-portal/hr-result" },
   { label: "Selected Candiates", path: "/hr-portal/selectedList" },
   

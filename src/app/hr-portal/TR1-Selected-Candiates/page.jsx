@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import DataTable from "react-data-table-component";
 import Header from "@/components/Header";
-import { View, X, NotepadText, UserCheck, MessagesSquare, Download, ListOrdered } from "lucide-react";
+import { View, X, NotepadText, UserCheck, MessagesSquare, Download } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as XLSX from "xlsx";
 
@@ -24,7 +24,6 @@ function HrPortal_Exam() {
   // Form State for Popup
   const [feedback, setFeedback] = useState("");
   const [topic, setTopic] = useState("");
-  const [score, setScore] = useState("");
   const [selectorName, setSelectorName] = useState("");
   const [isSelected, setIsSelected] = useState(false);
 
@@ -39,7 +38,7 @@ function HrPortal_Exam() {
   // 2. Fetch Data
   const fetchStudents = async () => {
     try {
-      const res = await fetch("/api/jam-result");
+      const res = await fetch("/api/tr1-Exam-Result");
       const data = await res.json();
       if (data.success) {
         const flattened = Object.entries(data.data || {}).flatMap(
@@ -80,7 +79,6 @@ function HrPortal_Exam() {
         ...selectedStudent,
         feedback,
         topic,
-        score,
         selectorName,
         jam_selected: isSelected,
       };
@@ -95,7 +93,7 @@ function HrPortal_Exam() {
       if (data.success) {
         setResponse(
           <div className="fixed top-5 left-1/2 -translate-x-1/2 bg-green-600 text-white px-6 py-2 rounded shadow-lg z-[60]">
-            Shortlisted for Technical Exam.
+            Update Successful!
           </div>
         );
         setIsModalOpen(false);
@@ -178,9 +176,11 @@ function HrPortal_Exam() {
     { name: "Phone Number", selector: (row) => row.phone, sortable: true, width: "220px" },
     { name: "Student ID", selector: (row) => row.studentId, sortable: true },
     { name: "College", selector: (row) => row.collegeName, sortable: true, width: "250px" },
-    { name: "Aptitude Select", selector: (row) => row.Aptitude_select ? "Yes" : "No", sortable: true },
-    {
-      name: "Action",
+    { name: "Topic", selector: (row) => row.topic, sortable: true },
+    { name: "Score", selector: (row) => row.score, sortable: true },
+    { name: "Feedback", selector: (row) => row.feedback, sortable: true },
+     {
+      name: "View Details",
       cell: (row) => (
         <button
           onClick={() => handleOpenModal(row)}
@@ -197,18 +197,9 @@ function HrPortal_Exam() {
     <div className="p-6 min-h-screen bg-gray-50">
       <h1 className="text-2xl font-bold mb-4">Selected for Jam</h1>
 
-      {/* Filters Row */}
+     
       <div className="flex gap-4 mb-6 flex-wrap items-end">
-        <div>
-          <label className="block text-sm font-bold mb-1">College Name</label>
-          <input
-            type="text"
-            placeholder="Search College..."
-            value={collegeNameSearch}
-            onChange={(e) => setCollegeNameSearch(e.target.value)}
-            className="border px-3 py-2 rounded w-64 outline-none focus:ring-2 focus:ring-blue-400"
-          />
-        </div>
+      
 
         <div>
           <label className="block text-sm font-bold mb-1">Student ID</label>
@@ -253,114 +244,44 @@ function HrPortal_Exam() {
           responsive
         />
       </div>
-
-      {/* Popup Modal */}
       {isModalOpen && selectedStudent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-auto flex flex-col">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-auto flex flex-col">
             
             <div className="flex justify-between items-center p-5 border-b bg-gray-50">
-              <h2 className="text-xl font-bold text-gray-800">Review Result - {selectedStudent.studentName}</h2>
+              <h2 className="text-xl font-bold text-blue-900">Details - {selectedStudent.studentName}</h2>
               <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-red-100 rounded-full">
                 <X size={24} />
               </button>
             </div>
-
-            <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="space-y-6">
-                <div>
-                  <label className="font-bold flex items-center gap-2 mb-2 text-gray-700">
-                    <NotepadText size={18} /> Topic
-                  </label>
-                  <input
-                    type="text"
-                    value={topic}
-                    onChange={(e) => setTopic(e.target.value)}
-                    className="border-2 rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-400 outline-none border-gray-200"
-                  />
-                </div>
-               
-               
-                <div>
-                  <label className="font-bold flex items-center gap-2 mb-2 text-gray-700">
-                    <MessagesSquare size={18} /> Feedback
-                  </label>
-                  <textarea
-                    rows={6}
-                    value={feedback}
-                    onChange={(e) => setFeedback(e.target.value)}
-                    className="border-2 rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-400 outline-none border-gray-200"
-                  ></textarea>
-                  
+             <div className="p-6 space-y-4 font-bold align-item-center">
+                <div className="w-full flex ">
+               <p className="w-1/2">Student Id </p> <span className="font-normal w-1/2"> :    {selectedStudent.studentId}</span>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={isSelected}
-                    onChange={(e) => setIsSelected(e.target.checked)}
-                    className="w-6 h-6 accent-blue-900"
-                  />
-                  <label className="font-bold text-gray-700 select-none">Shortlist for Next Round?</label>
+                                <div className="w-full flex ">
+               <p className="w-1/2">Name</p> <span className="font-normal w-1/2">:  {selectedStudent.studentName}</span>
                 </div>
-              </div>
-
-              
-
-              <div className="space-y-6">
-                <div>
-                  <label className="font-bold flex items-center gap-2 mb-2 text-gray-700">
-                    <UserCheck size={18} /> Invigilator Name
-                  </label>
-                  <select
-                    value={selectorName}
-                    onChange={(e) => setSelectorName(e.target.value)}
-                    className="border-2 rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-400 outline-none border-gray-200"
-                  >
-                    <option value="">Select Invigilator</option>
-                    <option value="raja-sekhar">Raja Sekhar</option>
-                    <option value="faruk">Faruk</option>
-                    <option value="sathis">Sathis</option>
-                    <option value="vanitha">Vanitha</option>
-                    <option value="malika">Malika</option>
-                    <option value="bindu">Bindu</option>
-                    <option value="madhavi">Madhavi</option>
-                    <option value="nagendra">Nagendra</option>
-                    <option value="mohan-krishna">Mohan Krishna</option>
-                  </select>
+ 
+                 <div className="w-full flex ">
+               <p className="w-1/2">Email</p> <span className="font-normal w-1/2">:  {selectedStudent.studentEmail}</span>
                 </div>
-
-                 <label className="font-bold flex items-center gap-2 mb-2 text-gray-700">
-                    <ListOrdered size={18} /> Score
-                  </label>
-                  <select
-                   value={score}
-                    onChange={(e) => setScore(e.target.value)}
-                   name="score" id="score" className="border-2 rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-400 outline-none border-gray-200">
-                    <option value="1">Select Score</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8</option>
-                    <option value="9">9</option>
-                    <option value="10">10</option>
-                  </select>
-              </div>
-             
-            </div>
-
-            <div className="p-5 border-t bg-gray-50 flex justify-end gap-4">
-              <button onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 font-semibold text-gray-600 hover:bg-gray-200 rounded-lg">
-                Discard
-              </button>
-              <button onClick={handleSubmit} className="px-8 py-2.5 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 shadow-lg">
-                Submit & Save
-              </button>
-            </div>
+                <div className="w-full flex ">
+                <p className="w-1/2">Phone </p> <span className="font-normal w-1/2">:  {selectedStudent.phone}</span>
+                </div>
+                <div className="w-full flex ">
+                <p className="w-1/2">College Name </p> <span className="font-normal w-1/2"> :  {selectedStudent.collegeName}</span>
+                </div>
+                <div className="w-full flex ">
+                <p className="w-1/2">Topic </p> <span className="font-normal w-1/2">:  {selectedStudent.topic}</span>
+                </div>
+                <div className="w-full flex ">
+                <p className="w-1/2">Score </p> <span className="font-normal w-1/2"> :  {selectedStudent.score}</span>
+                </div>
+                <div className="w-full flex ">
+                <p className="w-1/2">Feedback </p> <span className="font-normal w-1/2"> :  {selectedStudent.feedback}</span>
+                </div   >
+             </div>
           </div>
         </div>
       )}

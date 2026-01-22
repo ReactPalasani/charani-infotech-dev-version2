@@ -48,7 +48,7 @@ function UserValidation() {
         }, 2000);
 
       } else {
-        setResponse(<div className='flex justify-center align-middle text-center text-red-800 font-bold mt-6'> ❌ {data.message} </div>);
+        setResponse(<div className='flex justify-center align-middle text-center text-red-800 font-bold mt-6'> ❌ You have already attended the Technical Round </div>);
 
         setTimeout(() => {
           setResponse("");

@@ -17,6 +17,7 @@ export default function SubmitExamButton() {
     const studentEmail = StudentData.email || "Unknown";
     const studentId = StudentData.studentId || "Unknown";
     const collegeName = StudentData.collegeName || "Unknown";
+    const phone = StudentData.phone || "Unknown";
 
     // 🔹 Calculate total and correct
     let totalQuestions = 0;
@@ -44,6 +45,7 @@ export default function SubmitExamButton() {
       totalQuestions,
       correctAnswers,
       percentage,
+      phone,
       submittedAt: new Date().toISOString(),
 
     };

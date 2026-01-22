@@ -36,8 +36,9 @@ export default function ResultPageContent() {
 
         setResult(studentResult);
       } catch (error) {
-
+       throw new Error("Failed to fetch result data");
       }
+      finally { localStorage.clear(); };
     };
 
     fetchResult();
@@ -49,7 +50,7 @@ export default function ResultPageContent() {
 
   const handleBack = () => {
     localStorage.removeItem("StudentData"); // ✅ only remove what you need
-    router.replace("/registration");
+    router.replace("/tech-exam");
   };
 
   return (
