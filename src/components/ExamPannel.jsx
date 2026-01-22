@@ -283,23 +283,19 @@ export default function ExamPanel() {
 
         <div className="flex justify-between mt-6">
           <button
-            className="bg-black text-white px-4 py-2 rounded flex items-center disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200"
-            onClick={() => {
-              if (isExamActiveRef.current && currentIndex > 0) {
-                setCurrentIndex(i => i - 1);
-              }
-            }}
-            disabled={!isExamActiveRef.current || currentIndex === 0}
+            className="bg-black text-white px-4 py-2 rounded flex items-center opacity-0 pointer-events-none"
+            onClick={() => setCurrentIndex(i => i - 1)}
+            disabled={currentIndex === 0}
           >
-            <ArrowLeft className="mr-2" /> Previous
+            <ArrowLeft/> Previous 
           </button>
 
           <button
-            className="bg-yellow-600 text-white px-4 py-2 rounded flex items-center hover:bg-yellow-700 disabled:bg-yellow-400 disabled:cursor-not-allowed transition-all duration-200"
+            className="bg-yellow-600 text-white px-4 py-2 rounded flex items-center"
             onClick={handleNext}
             disabled={!isExamActiveRef.current}
           >
-            {isLastQuestion ? "Next Section" : "Next"} <ArrowRight className="ml-2" />
+            {isLastQuestion ? "Next Section" : "Next"} <ArrowRight/>
           </button>
         </div>
       </div>
