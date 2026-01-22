@@ -205,7 +205,7 @@ export default function QuestionPalette() {
 
   const sectionAnswers = answers[section] || {};
 
-  const TIME_PER_QUESTION = 45;
+  const TIME_PER_QUESTION = 30;
 
   const [timeLeft, setTimeLeft] = useState(TIME_PER_QUESTION);
   const [timeExpiredQuestions, setTimeExpiredQuestions] = useState(new Set());
@@ -292,6 +292,7 @@ export default function QuestionPalette() {
         <span className={`${isWarning ? "text-red-600 font-bold animate-pulse" : ""}`}>
           {timeLeft}
         </span>
+        sec
       </div>
 
       <div className="w-full bg-white p-4  shadow  border">
