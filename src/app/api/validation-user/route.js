@@ -63,7 +63,8 @@ export async function POST(req) {
         collegeName: userData.collegeName,
         selectorName: userData.selectorName,
         studentId : userData.studentId,
-        studentEmail:userData.studentEmail
+        studentEmail:userData.studentEmail,
+        phone:userData.phone
       },
     });
   } catch (error) {

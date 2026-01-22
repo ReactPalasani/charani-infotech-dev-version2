@@ -15,47 +15,73 @@ function HrPortal_Exam() {
   const [collgeNameSearch, setCollegeNameSearch] = useState("");
   const [percentageSearch, setPercentageSearch] = useState("");
   const [selectedRows, setSelectedRows] = useState([]);
+
+  // College dropdown states
+  const [showCollegeDropdown, setShowCollegeDropdown] = useState(false);
+  const [selectedColleges, setSelectedColleges] = useState([]);
+  const [tempColleges, setTempColleges] = useState([]);
+  const [collegeList, setCollegeList] = useState([]); // fetched from API
+
   const router = useRouter();
 
   // 1. Auth Check
   useEffect(() => {
-    const admin = JSON.parse(localStorage.getItem('AdminLogin'));
+    const admin = JSON.parse(localStorage.getItem("AdminLogin"));
     if (!admin) {
-      router.push('/admin');
+      router.push("/admin");
     }
   }, [router]);
 
-  // 2. Fetch Data
+  // 2. Fetch Students
   useEffect(() => {
-    const fetchStudents = async () => {
-      try {
-        const res = await fetch("/api/result");
-        const data = await res.json();
+  const fetchStudents = async () => {
+    try {
+      const res = await fetch("/api/result");
+      const data = await res.json();
 
+      if (data.success) {
+        const flattened = Object.entries(data.data || {}).flatMap(
+          ([studentId, collegeObj]) =>
+            Object.entries(collegeObj).map(([resultId, value]) => ({
+              id: resultId,        // ✅ UNIQUE ID
+              studentId,
+              ...value,
+            }))
+        );
+
+        setStudentData(data.data); // ✅ ONLY REQUIRED FIX
+      }
+    } catch (error) {
+
+      setResponse(
+        <div className="flex justify-center text-red-800 font-bold mt-6">
+          Error fetching users
+        </div>
+      );
+    }
+  };
+
+  fetchStudents();
+}, []);
+
+
+  // 3. Fetch College List from API
+  useEffect(() => {
+    const fetchColleges = async () => {
+      try {
+        const res = await fetch("/api/add-colleges");
+        const data = await res.json();
         if (data.success) {
-          const flattened = Object.entries(data.data || {}).flatMap(
-            ([studentId, collegeObj]) =>
-              Object.entries(collegeObj).map(([resultId, value]) => ({
-                id: resultId,
-                studentId,
-                ...value,
-              }))
-          );
-          setStudentData(data.data);
-          console.log("flattened",flattened);
+          setCollegeList(data.data); // each item: { collegeName, status }
         }
       } catch (error) {
-        setResponse(
-          <div className='flex justify-center text-red-800 font-bold mt-6'>
-            Error fetching users
-          </div>
-        );
+        console.error("Error fetching colleges:", error);
       }
     };
-    fetchStudents();
+    fetchColleges();
   }, []);
 
-  // 3. Status Submit Logic (Bulk Selection)
+  // 4. Bulk Selection Submit
   const handleBulkSelect = async () => {
     if (selectedRows.length === 0) {
       alert("Please select at least one student.");
@@ -68,6 +94,7 @@ function HrPortal_Exam() {
       const payload = {
         studentName: student.studentName,
         studentEmail: student.studentEmail,
+        phone: student.phone,
         studentId: student.studentId,
         collegeName: student.collegeName,
         totalQuestions: student.totalQuestions,
@@ -75,9 +102,8 @@ function HrPortal_Exam() {
         submittedAt: student.submittedAt,
         feedback: "",
         topic: "",
-        score: student.correctAnswers,
         selectorName: "HR_Admin",
-        Aptitude_select: true
+        Aptitude_select: true,
       };
 
       try {
@@ -89,26 +115,23 @@ function HrPortal_Exam() {
 
         const data = await res.json();
         if (!data.success) hasError = true;
-      } catch (error) {
-
+      } catch {
         hasError = true;
       }
     }
 
-    if (!hasError) {
-      setResponse(
-        <div className='fixed top-10 left-1/2 -translate-x-1/2 z-50 bg-green-100 border-2 border-green-600 text-green-800 px-6 py-2 rounded shadow-lg font-bold'>
-          Selected students submitted successfully!
+    setResponse(
+      !hasError ? (
+        <div className="fixed top-10 left-1/2 -translate-x-1/2 z-50 bg-green-100 border-2 border-green-600 text-green-800 px-6 py-2 rounded shadow-lg font-bold">
+          Seleceted students have been shortlisted for next round.
         </div>
-      );
-      setSelectedRows([]);
-    } else {
-      setResponse(
-        <div className='fixed top-10 left-1/2 -translate-x-1/2 z-50 bg-red-100 border-2 border-red-600 text-red-800 px-6 py-2 rounded shadow-lg font-bold'>
+      ) : (
+        <div className="fixed top-10 left-1/2 -translate-x-1/2 z-50 bg-red-100 border-2 border-red-600 text-red-800 px-6 py-2 rounded shadow-lg font-bold">
           Some students already exist or an error occurred.
         </div>
-      );
-    }
+      )
+    );
+
     setTimeout(() => setResponse(null), 2000);
   };
 
@@ -120,27 +143,58 @@ function HrPortal_Exam() {
     );
   };
 
-  // 4. Filtering Logic
+    const handleSelectAll = (e) => {
+    if (e.target.checked) setSelectedRows(filteredData);
+    else setSelectedRows([]);
+  };
+  // 5. Filtering Logic
   const filteredData = useMemo(() => {
-    return studentData.filter(student => {
+    return studentData.filter((student) => {
       const matchStudentId = studentIdSearch
-        ? student.studentId?.toLowerCase().includes(studentIdSearch.toLowerCase())
+        ? student.studentId
+            ?.toLowerCase()
+            .includes(studentIdSearch.toLowerCase())
         : true;
-      const matchCollege = collgeNameSearch
-        ? student.collegeName?.toLowerCase().includes(collgeNameSearch.toLowerCase())
-        : true;
+
+      // College filter (case-insensitive) from API
+      const matchCollege =
+        selectedColleges.length > 0
+          ? selectedColleges.some(
+              (college) =>
+                college.toLowerCase().trim() ===
+                student.collegeName?.toLowerCase().trim()
+            )
+          : collgeNameSearch
+          ? student.collegeName
+              ?.toLowerCase()
+              .includes(collgeNameSearch.toLowerCase())
+          : true;
+
       const matchCorrectAnswers = correctAnswersSearch
         ? Number(student.correctAnswers) >= Number(correctAnswersSearch)
         : true;
+
       const matchPercentage = percentageSearch
         ? Number(student.percentage) >= Number(percentageSearch)
         : true;
 
-      return matchStudentId && matchCollege && matchCorrectAnswers && matchPercentage;
+      return (
+        matchStudentId &&
+        matchCollege &&
+        matchCorrectAnswers &&
+        matchPercentage
+      );
     });
-  }, [studentData, studentIdSearch, collgeNameSearch, correctAnswersSearch, percentageSearch]);
+  }, [
+    studentData,
+    studentIdSearch,
+    collgeNameSearch,
+    correctAnswersSearch,
+    percentageSearch,
+    selectedColleges,
+  ]);
 
-  // Excel Download Logic
+  // 6. Excel Download
   const downloadExcel = () => {
     if (!filteredData.length) return;
     const excelData = filteredData.map((row, index) => {
@@ -156,107 +210,157 @@ function HrPortal_Exam() {
     XLSX.writeFile(workbook, "Aptitude_Results.xlsx");
   };
 
-  // 5. Columns Configuration
+  // 7. Columns
   const columns = [
+    { name: "S.No", cell: (row, index) => index + 1, width: "80px" },
+    { name: "Name", selector: (row) => row.studentName, sortable: true },
     {
-      name: "S.No",
-      cell: (row, index) => index + 1,
-      width: "80px",
+      name: "Email",
+      selector: (row) => row.studentEmail,
+      sortable: true,
+      width: "250px",
     },
-    { name: "Name", selector: row => row.studentName, sortable: true },
-    { name: "Email", selector: row => row.studentEmail, sortable: true, width: "250px" },
-     { name: "Phone Number", selector: row => row.phone, sortable: true, width: "250px" },
-    { name: "Student ID", selector: row => row.studentId, sortable: true },
-    { name: "College Name", selector: row => row.collegeName, sortable: true, width: "250px" },
-    { name: "Total Questions", selector: row => row.totalQuestions, sortable: true },
-    { name: "Correct Answers", selector: row => row.correctAnswers, sortable: true },
-    { name: "percentage", selector: row => row.percentage, sortable: true },
-    { name: "Submitted At", selector: row => row.submittedAt, sortable: true },
     {
-      name: "Selection",
-      width: "100px",
-      cell: row => (
-        <input
-          type="checkbox"
-          className="w-5 h-5 cursor-pointer"
-          checked={!!selectedRows.find((s) => s.id === row.id)}
-          onChange={() => handleCheckboxChange(row)}
-        />
-      ),
-      ignoreRowClick: true,
+      name: "Phone Number",
+      selector: (row) => row.phone,
+      sortable: true,
+      width: "250px",
     },
+    { name: "Student ID", selector: (row) => row.studentId, sortable: true },
+    {
+      name: "College Name",
+      selector: (row) => row.collegeName,
+      sortable: true,
+      width: "250px",
+    },
+    { name: "Total Questions", selector: (row) => row.totalQuestions, sortable: true  },
+    { name: "Correct Answers", selector: (row) => row.correctAnswers, sortable: true  },
+    { name: "percentage", selector: (row) => row.percentage, sortable: true  },
+    { name: "Submitted At", selector: (row) => row.submittedAt , sortable: true },
+    // {
+    //   name: "Selection",
+    //   width: "100px",
+    //   cell: (row) => (
+    //     <input
+    //       type="checkbox"
+    //       className="w-5 h-5 cursor-pointer"
+    //       checked={!!selectedRows.find((s) => s.id === row.id)}
+    //       onChange={() => handleCheckboxChange(row)}
+    //     />
+    //   ),
+    // },
   ];
 
   return (
     <div className="p-1 bg-gray-50 min-h-screen">
-      <div className="flex items-center ">
+      <div className="flex items-center">
+        <h1 className="text-2xl font-bold mb-4 mt-4">Aptitude Result</h1>
 
-      <h1 className="text-2xl font-bold mb-4 mt-4">Aptitude Result</h1>
-      {/* select and disselect */}
-      <div className="flex ml-auto gap-6 h-10">
-      <button
-        onClick={() => {
-          if (selectedRows.length === filteredData.length) {
-            setSelectedRows([]);
-          } else {
-            setSelectedRows(filteredData);
-          }
-        }}
-        className="bg-yellow-600 text-white px-6  rounded font-bold flex items-center gap-2 hover:bg-yellow-700 transition shadow-md ml-auto"
-      >
-        {selectedRows.length === filteredData.length ? "Deselect All" : "Select All"}
-      </button>
+        <div className="flex ml-auto gap-6 h-10">
+          <button
+            onClick={() =>
+              selectedRows.length === filteredData.length
+                ? setSelectedRows([])
+                : setSelectedRows(filteredData)
+            }
+            className="bg-yellow-600 text-white px-6 rounded font-bold"
+          >
+            {selectedRows.length === filteredData.length
+              ? "Deselect All"
+              : "Select All"}({selectedRows.length})
+          </button>
 
-      {/* Excel Download Button */}
-      <button
-        onClick={downloadExcel}
-        className="flex items-center justify-center gap-2 bg-green-700 text-white px-6 py-[9px] rounded font-bold hover:bg-green-800 transition shadow-sm"
-      >
-        <Download size={18} /> Download Excel
-      </button>
-      </div>
+          <button
+            onClick={downloadExcel}
+            className="flex items-center gap-2 bg-green-700 text-white px-6 rounded font-bold"
+          >
+            <Download size={18} /> Download Excel
+          </button>
+        </div>
       </div>
 
-      {/* Filters & Actions Section */}
+      {/* Filters */}
       <div className="flex gap-4 mb-4 flex-wrap bg-white p-4 rounded shadow-sm items-center">
-        <input
-          type="text"
-          placeholder="Search By College Name"
-          value={collgeNameSearch}
-          onChange={e => setCollegeNameSearch(e.target.value)}
-          className="border px-3 py-2 rounded w-60 outline-none focus:ring-2 focus:ring-blue-400"
-        />
+        {/* College Dropdown */}
+        <div className="relative">
+          <button
+            onClick={() => {
+              setTempColleges(selectedColleges);
+              setShowCollegeDropdown(!showCollegeDropdown);
+            }}
+            className="border px-4 py-2 rounded w-60 bg-white text-left"
+          >
+            {selectedColleges.length > 0
+              ? selectedColleges.join(", ")
+              : "Select College"}
+          </button>
+
+          {showCollegeDropdown && (
+            <div className="absolute z-10 bg-white border rounded shadow-md p-3 w-60 max-h-60 overflow-auto">
+              {collegeList.map((collegeObj) => {
+                const name = collegeObj.collegeName; // extract string
+                return (
+                  <label key={name} className="flex items-center gap-2 mb-2">
+                    <input
+                      type="checkbox"
+                      checked={tempColleges.includes(name)}
+                      onChange={(e) =>
+                        setTempColleges((prev) =>
+                          e.target.checked
+                            ? [...prev, name]
+                            : prev.filter((c) => c !== name)
+                        )
+                      }
+                    />
+                    {name}
+                  </label>
+                );
+              })}
+
+              <button
+                onClick={() => {
+                  setSelectedColleges(tempColleges);
+                  setShowCollegeDropdown(false);
+                }}
+                className="mt-2 w-full bg-blue-600 text-white py-1 rounded"
+              >
+                Select
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Other Filters */}
         <input
           type="text"
           placeholder="Search By Student ID"
           value={studentIdSearch}
-          onChange={e => setstudentIdSearch(e.target.value)}
-          className="border px-3 py-2 rounded w-60 outline-none focus:ring-2 focus:ring-blue-400"
+          onChange={(e) => setstudentIdSearch(e.target.value)}
+          className="border px-3 py-2 rounded w-60"
         />
         <input
           type="number"
           placeholder="Min Correct Answers"
           value={correctAnswersSearch}
-          onChange={e => setCorrectAnswersSearch(e.target.value)}
-          className="border px-3 py-2 rounded w-60 outline-none focus:ring-2 focus:ring-blue-400"
+          onChange={(e) => setCorrectAnswersSearch(e.target.value)}
+          className="border px-3 py-2 rounded w-60"
         />
         <input
           type="text"
           placeholder="Min Percentage"
           value={percentageSearch}
-          onChange={e => setPercentageSearch(e.target.value)}
-          className="border px-3 py-2 rounded w-60 outline-none focus:ring-2 focus:ring-blue-400"
+          onChange={(e) => setPercentageSearch(e.target.value)}
+          className="border px-3 py-2 rounded w-60"
         />
-        {/* Bulk Select Button */}
+
         <button
           onClick={handleBulkSelect}
-          className="bg-green-600 text-white px-6 py-2 rounded font-bold flex items-center gap-2 hover:bg-green-700 transition shadow-md"
+          className="bg-green-600 text-white px-6 py-2 rounded font-bold flex items-center gap-2"
         >
-          <CheckCircle size={18} /> Select
+          <CheckCircle size={18} /> Shortlisted
         </button>
       </div>
 
-      {/* Table Section */}
       <div className="bg-white rounded shadow">
         <DataTable
           columns={columns}
@@ -268,7 +372,6 @@ function HrPortal_Exam() {
         />
       </div>
 
-      {/* Response Message Popup */}
       {response}
     </div>
   );
